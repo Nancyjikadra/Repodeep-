@@ -4,6 +4,7 @@ const express = require('express');
 const { Octokit } = require('@octokit/rest');
 const path = require('path');
 const cors = require('cors'); // To allow frontend (if separate origin) to talk to backend
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000; // Use port 3000 or environment variable
@@ -16,7 +17,14 @@ const octokit = new Octokit({
 // Middleware
 app.use(cors()); // Enable CORS for all origins (adjust in production)
 app.use(express.json()); // To parse JSON request bodies
-app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from public directory
+// Serve the index.html file for the root path
+// This is crucial to ensure index.html is served when accessing http://localhost:3000/
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Serve static files from public directory (CSS, JS, etc.)
+app.use(express.static(path.join(__dirname, 'public')));
 
 // API Endpoint to analyze repo
 app.post('/analyze-repo', async (req, res) => {
